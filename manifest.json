@@ -1,10 +1,11 @@
 {
-  "Name": "Heelies",
-  "Author": "fakemonster",
-  "Version": "0.4.0",
-  "Description": "Sick heelies for the homie",
-  "UniqueID": "fakemonster.Heelies",
-  "EntryDll": "Heelies.dll",
+  "Name": "Sprinter",
+  "Author": "Jevon Lipsey",
+  "Version": "1.0.0",
+  "Description": "A rework of HeeliesMod by fakemonster/moonbaseboss with preserved animations and dirt kick-up effects.",
+  "UniqueID": "Jevon.Sprinter",
+  "EntryDll": "Sprinter.dll",
   "MinimumApiVersion": "4.0.0",
-  "UpdateKeys": ["Nexus:7751"]
+  "UpdateKeys": [],
+  "ContentPackFor": null
 }
