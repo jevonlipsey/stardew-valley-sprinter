@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -6,62 +7,46 @@ using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Buffs;
 using StardewValley.Network;
+using StardewValley.TerrainFeatures;
 
-namespace Heelies
+namespace Sprinter
 {
     public class ModConfig
     {
-        public KeybindList heeliesButton = KeybindList.Parse("Space");
+        public KeybindList SprinterButton = KeybindList.Parse("Space, RightShoulder");
         public decimal initialSpeedBoost = 3.5m;
         public float staminaCost = 0;
     }
 
-    public class HeeliesMod : Mod
+    public class SprinterMod : Mod
     {
-        private static readonly int[] frames = { 13, 7, 1, 7 };
-        private const int Left = 3;
         private const decimal Deceleration = 0.1m;
-        private const string BuffId = "Moonbaseboss.HeeliesMod_Roll";
+        private const string BuffId = "Moonbaseboss.SprinterMod_Roll";
         private const string IconPath = "assets/slides.png";
 
-        private readonly PerScreen<bool> isRolling = new PerScreen<bool>(createNewState: () => false);
-        private readonly PerScreen<decimal> speedBuff = new PerScreen<decimal>(createNewState: () => 0m);
+        private readonly PerScreen<bool> isRolling = new(() => false);
+        private readonly PerScreen<decimal> speedBuff = new(() => 0m);
         public ModConfig config;
 
-
-        /*********
-        ** Public methods
-        *********/
-        /// <summary>The mod entry point, called after the mod is first loaded.</summary>
-        /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
             config = this.Helper.ReadConfig<ModConfig>();
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
             helper.Events.GameLoop.UpdateTicking += this.OnUpdateTicking;
             helper.Events.Player.Warped += this.OnWarped;
-            // preload this asset for a less-jumpy first roll
             this.Helper.ModContent.Load<Texture2D>(IconPath);
         }
 
-
-        /*********
-        ** Private methods
-        *********/
-        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event data.</param>
         private void OnButtonsChanged(object sender, ButtonsChangedEventArgs e)
         {
-            // ignore if player isn't in a position to cruise
             if (!Context.IsPlayerFree)
                 return;
 
-            if (!IsRolling() && config.heeliesButton.JustPressed() && CanRoll())
+            if (!IsRolling() && config.SprinterButton.JustPressed() && CanRoll())
             {
                 Engage();
             }
-            if (IsRolling() && config.heeliesButton.GetState() == SButtonState.Released)
+            if (IsRolling() && config.SprinterButton.GetState() == SButtonState.Released)
             {
                 Disengage();
             }
@@ -83,61 +68,39 @@ namespace Heelies
             }
         }
 
-        private bool IsRolling()
-        {
-            return isRolling.Value;
-        }
-
-        private void SetIsRolling(bool rolling)
-        {
-            isRolling.SetValueForScreen(Context.ScreenId, rolling);
-        }
-
-        private decimal SpeedBuff()
-        {
-            return speedBuff.Value;
-        }
-
+        private bool IsRolling() => isRolling.Value;
+        private void SetIsRolling(bool rolling) => isRolling.SetValueForScreen(Context.ScreenId, rolling);
+        private decimal SpeedBuff() => speedBuff.Value;
         private void SetSpeedBuff(decimal newBuff)
         {
-            Buff buff = new Buff(
+            Buff buff = new(
                 id: BuffId,
-                displayName: "Heelies",
+                displayName: "Sprinter",
                 description: newBuff <= 0 ? "Looks like you need a push." : "",
                 iconTexture: this.Helper.ModContent.Load<Texture2D>(IconPath),
                 iconSheetIndex: IconIndex(newBuff),
                 duration: Buff.ENDLESS,
-                effects: new BuffEffects()
-                {
-                    Speed = { (float)newBuff }
-                }
+                effects: new BuffEffects() { Speed = { (float)newBuff } }
             );
             Game1.player.applyBuff(buff);
-
             speedBuff.SetValueForScreen(Context.ScreenId, newBuff);
         }
 
         private void BurnStamina(float staminaCost)
         {
             if (staminaCost > 0)
-            {
                 Game1.player.Stamina -= staminaCost;
-            }
         }
 
         private int IconIndex(decimal speed)
         {
-            switch (speed)
+            return speed switch
             {
-                case > 2:
-                    return 0;
-                case > 1:
-                    return 1;
-                case > 0:
-                    return 2;
-                default:
-                    return 3;
-            }
+                > 2 => 0,
+                > 1 => 1,
+                > 0 => 2,
+                _ => 3
+            };
         }
 
         private bool CanRoll()
@@ -153,55 +116,67 @@ namespace Heelies
             NetPosition position = Game1.player.position;
             SetSpeedBuff(config.initialSpeedBoost);
             BurnStamina(config.staminaCost);
-            Debug($"{Game1.player.Name} engaged heelies at {position.X} {position.Y} | Speed buff: {SpeedBuff()}");
-
             SetIsRolling(true);
         }
 
         private void Roll(bool shouldDecrement)
         {
-            AnimateRoll(Game1.player.movementDirections);
-
             if (shouldDecrement)
             {
                 SetSpeedBuff(Math.Max(SpeedBuff() - Deceleration, -5));
+                SpawnDirtEffect();
             }
             else
             {
-                // TODO: not reloading the buff on every frame makes the icon wacky. why??
                 SetSpeedBuff(SpeedBuff());
             }
         }
 
-        private void AnimateRoll(System.Collections.Generic.List<int> directions)
+        private void SpawnDirtEffect()
         {
-            if (directions.Count > 0 && directions[0] >= 0 && directions[0] <= 3)
+            int direction = Game1.player.FacingDirection;
+            Vector2 offset = direction switch
             {
-                int dir = directions[0];
-                Game1.player.faceDirection(dir);
-                Game1.player.showFrame(frames[dir], dir == Left);
-            }
+                0 => new Vector2(0, 32),
+                1 => new Vector2(-32, 0),
+                2 => new Vector2(0, -32),
+                3 => new Vector2(32, 0),
+                _ => Vector2.Zero
+            };
+
+            Vector2 position = Game1.player.Position + offset;
+
+            TemporaryAnimatedSprite sprite = new(
+                textureName: "TileSheets\animations",
+                sourceRect: new Rectangle(0, 960, 64, 64),
+                animationInterval: 80f,
+                animationLength: 8,
+                numberOfLoops: 1,
+                position: position,
+                flicker: false,
+                flipped: false
+            )
+            {
+                scale = 0.75f,
+                layerDepth = 1f,
+                alphaFade = 0.01f,
+                motion = new Vector2(0, -0.3f),
+                acceleration = new Vector2(0, -0.02f)
+            };
+
+            Game1.currentLocation.TemporarySprites.Add(sprite);
         }
 
         private void Disengage()
         {
             SetIsRolling(false);
-            Buff buff = new Buff(
+            Buff buff = new(
                 id: BuffId,
-                displayName: "Heelies bro",
+                displayName: "Sprinter bro",
                 duration: 1
             );
             Game1.player.applyBuff(buff);
             Game1.player.completelyStopAnimatingOrDoingAction();
-
-
-            NetPosition position = Game1.player.position;
-            Debug($"{Game1.player.Name} released heelies at {position.X} {position.Y}");
-        }
-
-        private void Debug(String s)
-        {
-            // this.Monitor.Log(s, LogLevel.Debug);
         }
     }
 }
