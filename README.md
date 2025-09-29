@@ -35,7 +35,7 @@ You can find the original repo [here](https://github.com/fakemonster/stardew-val
 
 ## Links
 
-This mod is also posted on [Nexus Mods]().
+This mod is also posted on [Nexus Mods](https://www.nexusmods.com/stardewvalley/mods/37986).
 
 ## License
 
