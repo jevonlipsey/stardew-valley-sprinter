@@ -1,6 +1,8 @@
 # Sprinter
 
-Sprinter is a rework of [HeeliesMod](https://www.nexusmods.com/stardewvalley/mods/7751) originally created by [fakemonster](https://github.com/fakemonster). This mod preserves the original concept of activating a speed boost with a key press, while improving animation behavior and adding a visual dirt kick-up effect to enhance the sense of motion.
+Sprinter is a rework of [HeeliesMod](https://www.nexusmods.com/stardewvalley/mods/7751) originally created by [fakemonster](https://github.com/fakemonster). This mod preserves the original concept of activating a speed boost with a key press, while improving animation behavior and adding a visual dirt kick-up effect to enhance the sense of motion. I made this mod because I love the original, but dislike seeing the character freeze.
+
+![sprinter](https://giphy.com/gifs/sprintermod-xRhp0t8wryXMIyvT3j)
 
 ## Features
 
