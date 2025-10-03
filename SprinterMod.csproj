@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyName>Sprinter</AssemblyName>
-    <RootNamespace>Sprinter</RootNamespace>
+    <AssemblyName>SprinterMod</AssemblyName>
+    <RootNamespace>SprinterMod</RootNamespace>
     <Version>1.0.0</Version>
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>Latest</LangVersion>

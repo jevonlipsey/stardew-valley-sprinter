@@ -1,10 +1,10 @@
 {
-  "Name": "Sprinter",
+  "Name": "SprinterMod",
   "Author": "Jevon Lipsey",
   "Version": "1.0.0",
   "Description": "A rework of HeeliesMod by fakemonster/moonbaseboss with preserved animations and dirt kick-up effects.",
   "UniqueID": "Jevon.Sprinter",
-  "EntryDll": "Sprinter.dll",
+  "EntryDll": "SprinterMod.dll",
   "MinimumApiVersion": "4.0.0",
   "UpdateKeys": [],
   "ContentPackFor": null

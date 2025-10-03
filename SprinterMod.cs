@@ -147,7 +147,7 @@ namespace Sprinter
             Vector2 position = Game1.player.Position + offset;
 
             TemporaryAnimatedSprite sprite = new(
-                textureName: "TileSheets\animations",
+                textureName: "TileSheets/animations",
                 sourceRect: new Rectangle(0, 960, 64, 64),
                 animationInterval: 80f,
                 animationLength: 8,
